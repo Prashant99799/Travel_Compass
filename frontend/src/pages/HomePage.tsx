@@ -1,200 +1,262 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { PageContainer } from '../components/layout/PageContainer.js';
-import { Button } from '../components/common/Button.js';
-import { GlassCard } from '../components/common/GlassCard.js';
-import { SeasonBadge } from '../components/common/SeasonBadge.js';
-import { Loader } from '../components/common/Loader.js';
-import { TipCard } from '../components/feed/TipCard.js';
-import { getCurrentSeason, getSeasonInfo } from '../utils/seasonDetector.js';
-import { api } from '../services/api.js';
-import { Tip } from '../types/index.js';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, MapPin, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Search, Compass, Map, Lightbulb, Star, ArrowRight, Sparkles } from 'lucide-react';
+import { Button, Card, SeasonBadge, Input } from '../components/ui';
+import { DestinationCard } from '../components/cards';
+import { DESTINATIONS, TIPS } from '../data';
+import { getCurrentSeason, getGreeting, rankDestinations, getSeasonInfo } from '../utils';
 
 export const HomePage: React.FC = () => {
-  const [tips, setTips] = useState<Tip[]>([]);
-  const [loading, setLoading] = useState(true);
   const currentSeason = getCurrentSeason();
   const seasonInfo = getSeasonInfo(currentSeason);
-
-  useEffect(() => {
-    loadTrendingTips();
+  const greeting = getGreeting();
+  
+  // Get top destinations for current season
+  const topDestinations = useMemo(() => {
+    const ranked = rankDestinations(DESTINATIONS, {
+      season: currentSeason,
+      travelType: 'solo'
+    });
+    return ranked.slice(0, 4);
+  }, [currentSeason]);
+  
+  // Get top tips sorted by upvotes
+  const topTips = useMemo(() => {
+    return [...TIPS]
+      .sort((a, b) => b.upvotes - a.upvotes)
+      .slice(0, 3);
   }, []);
-
-  const loadTrendingTips = async () => {
-    try {
-      const data = await api.getTrendingTips();
-      setTips(data.slice(0, 3));
-    } catch (error) {
-      console.error('Error loading tips:', error);
-    } finally {
-      setLoading(false);
+  
+  const features = [
+    {
+      icon: Sparkles,
+      title: 'ML-Powered Rankings',
+      description: 'Smart destination recommendations based on season, budget, and your travel style.'
+    },
+    {
+      icon: Map,
+      title: 'Seasonal Insights',
+      description: 'Know the best time to visit each place with real-time season detection.'
+    },
+    {
+      icon: Lightbulb,
+      title: 'Local Tips',
+      description: 'Discover insider tips from travelers who\'ve been there.'
     }
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
-
+  ];
+  
   return (
-    <PageContainer>
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <motion.div
-          className="text-center mb-12"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div variants={itemVariants} className="mb-6">
-            <SeasonBadge season={currentSeason} size="lg" showLabel />
-          </motion.div>
-
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl md:text-6xl font-bold text-white mb-4"
-          >
-            Discover Ahmedabad,
-            <span className="gradient-text"> Season Smart</span>
-          </motion.h1>
-
-          <motion.p
-            variants={itemVariants}
-            className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto"
-          >
-            {seasonInfo.description} Get personalized travel recommendations
-            based on weather, season, and your preferences.
-          </motion.p>
-
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1548013146-72479768bada?w=1920')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-900" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl"
           >
-            <Link to="/search">
-              <Button size="lg" icon={<ArrowRight size={20} />}>
-                Explore Now
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline">
-              Learn More
-            </Button>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
-          Why Choose Compass?
-        </h2>
-
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          {[
-            {
-              icon: <Zap className="w-8 h-8" />,
-              title: 'AI-Powered',
-              description: 'Smart recommendations based on ML models',
-            },
-            {
-              icon: <MapPin className="w-8 h-8" />,
-              title: 'Season-Aware',
-              description: 'Perfect suggestions for current weather',
-            },
-            {
-              icon: <Users className="w-8 h-8" />,
-              title: 'Community',
-              description: 'Tips and insights from locals',
-            },
-          ].map((feature, idx) => (
-            <motion.div key={idx} variants={itemVariants}>
-              <GlassCard hover className="h-full flex flex-col items-center text-center">
-                <div className="text-purple-400 mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-300">{feature.description}</p>
-              </GlassCard>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* Trending Tips */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
-          Trending Tips
-        </h2>
-
-        {loading ? (
-          <Loader />
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {tips.map((tip) => (
-              <motion.div key={tip.id} variants={itemVariants}>
-                <TipCard
-                  tip={tip}
-                  onVote={async (tipId, voteType) => {
-                    try {
-                      await api.voteTip(tipId, voteType);
-                      loadTrendingTips();
-                    } catch (error) {
-                      console.error('Error voting:', error);
-                    }
-                  }}
+            <div className="flex items-center gap-2 mb-6">
+              <SeasonBadge season={currentSeason} />
+              <span className="text-slate-400">•</span>
+              <span className="text-slate-300">Perfect weather for exploring</span>
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              {greeting}! <br />
+              <span className="text-slate-300">Explore Ahmedabad</span>
+            </h1>
+            
+            <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-2xl">
+              Discover the best destinations, get personalized recommendations, 
+              and find insider tips—all optimized for the current season.
+            </p>
+            
+            {/* Search Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
+              <div className="flex-1">
+                <Input
+                  placeholder="Where do you want to go?"
+                  leftIcon={<Search className="w-5 h-5" />}
+                  className="bg-white/10 border-white/20 text-white placeholder-slate-400 focus:bg-white/20"
                 />
+              </div>
+              <Link to="/search">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100">
+                  Explore
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+      
+      {/* Features Section */}
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+              Smart Travel Planning
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Powered by machine learning to give you the best recommendations
+            </p>
+          </motion.div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full text-center">
+                  <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <feature.icon className="w-6 h-6 text-slate-700" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-slate-600 text-sm">
+                    {feature.description}
+                  </p>
+                </Card>
               </motion.div>
             ))}
-          </motion.div>
-        )}
+          </div>
+        </div>
       </section>
-
+      
+      {/* Top Destinations */}
+      <section className="py-16 sm:py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+                Top Picks for {seasonInfo.label}
+              </h2>
+              <p className="text-slate-600">
+                Best-rated destinations for this time of year
+              </p>
+            </div>
+            <Link to="/search">
+              <Button variant="outline" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                View All
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {topDestinations.map((dest, index) => (
+              <DestinationCard
+                key={dest.destination.id}
+                rankedDestination={dest}
+                season={currentSeason}
+                index={index}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Tips Section */}
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+                Trending Tips
+              </h2>
+              <p className="text-slate-600">
+                Most helpful advice from fellow travelers
+              </p>
+            </div>
+            <Link to="/tips">
+              <Button variant="outline" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                All Tips
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {topTips.map((tip, index) => (
+              <motion.div
+                key={tip.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card hover className="h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={tip.userAvatar}
+                      alt={tip.userName}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="text-sm font-medium text-slate-900">
+                      {tip.userName}
+                    </span>
+                    {tip.season && <SeasonBadge season={tip.season} size="sm" />}
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 font-medium mb-2">
+                    {tip.destinationName}
+                  </p>
+                  
+                  <p className="text-slate-700 text-sm line-clamp-3 mb-3">
+                    {tip.content}
+                  </p>
+                  
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <span>{tip.upvotes} helpful</span>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
       {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <motion.div
-          className="glass-strong rounded-2xl p-12 text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to explore Ahmedabad?
-          </h2>
-          <p className="text-gray-300 mb-8">
-            Get personalized travel recommendations in seconds
-          </p>
-          <Link to="/search">
-            <Button size="lg">Start Exploring</Button>
-          </Link>
-        </motion.div>
+      <section className="py-16 sm:py-20 bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Compass className="w-12 h-12 mx-auto mb-6 text-slate-400" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              Ready to Explore?
+            </h2>
+            <p className="text-slate-400 mb-8 max-w-xl mx-auto">
+              Start planning your perfect Ahmedabad adventure with personalized recommendations.
+            </p>
+            <Link to="/search">
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
+                Start Exploring
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
       </section>
-    </PageContainer>
+    </div>
   );
 };
+
+export default HomePage;

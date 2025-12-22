@@ -1,76 +1,56 @@
 export type Season = 'summer' | 'monsoon' | 'autumn' | 'winter';
-export type TravelType = 'solo' | 'couple' | 'family' | 'group';
-export type PlanStatus = 'planned' | 'ongoing' | 'completed';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  is_native: boolean;
-  avatar_url?: string;
-  bio?: string;
-  preferences?: Record<string, any>;
+export type TravelType = 'solo' | 'couple' | 'family' | 'friends';
+
+export interface SeasonalData {
+  score: number;
+  temp: string;
+  description: string;
+  activities: string[];
 }
 
 export interface Destination {
   id: string;
   name: string;
   description: string;
-  image_url: string;
+  imageUrl: string;
   category: string;
-  latitude: number;
-  longitude: number;
-  avg_budget: number;
-  avg_days: number;
-  popularity_score: number;
+  avgBudget: number;
+  avgDays: number;
+  popularity: number;
   tags: string[];
   highlights: string[];
+  seasonal: Record<Season, SeasonalData>;
+}
+
+export interface RankedDestination {
+  destination: Destination;
+  score: number;
+  matchQuality: 'excellent' | 'good' | 'fair' | 'poor';
+  factors: string[];
 }
 
 export interface Tip {
   id: string;
-  user_id: string;
-  destination_id: string;
-  destination_name: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  destinationId: string;
+  destinationName: string;
   content: string;
-  image_url?: string;
-  season: Season;
+  season: Season | null;
   tags: string[];
   upvotes: number;
   downvotes: number;
-  featured: boolean;
-  created_at: string;
-}
-
-export interface Recommendation {
-  destination: Destination;
-  matchScore: number;
-  seasonalMatch: number;
-  budgetFit: number;
-  tips: Tip[];
-  reasons: string[];
-  confidence: number;
+  createdAt: string;
 }
 
 export interface SearchParams {
-  days?: number;
+  searchQuery?: string;
   budget?: number;
+  days?: number;
   travelType?: TravelType;
-  interests?: string[];
-  season?: Season;
+  season: Season;
+  categories?: string[];
 }
 
-export interface TravelPlan {
-  id: string;
-  user_id: string;
-  destination_id: string;
-  budget: number;
-  days: number;
-  travel_type: TravelType;
-  season: Season;
-  start_date: string;
-  end_date: string;
-  status: PlanStatus;
-  notes?: string;
-  itinerary?: Record<string, any>;
-}
