@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: compass-db
+    environment:
+      POSTGRES_DB: compass
+      POSTGRES_USER: compass_user
+      POSTGRES_PASSWORD: compass_password_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U compass_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: compass-api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://compass_user:compass_password_dev@postgres:5432/compass
+      PORT: 3000
+      NODE_ENV: development
+      CLERK_SECRET_KEY: sk_test_xxx
+      CLERK_WEBHOOK_SECRET: whsec_xxx
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+    command: npm run dev
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: compass-web
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:3000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: compass-network
