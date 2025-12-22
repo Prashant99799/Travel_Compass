@@ -86,9 +86,8 @@ export const HomePage: React.FC = () => {
                 />
               </div>
               <Link to="/search">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100">
+                <Button variant="light" size="lg" className="w-full sm:w-auto" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Explore
-                  <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             </div>
@@ -247,9 +246,8 @@ export const HomePage: React.FC = () => {
               Start planning your perfect Ahmedabad adventure with personalized recommendations.
             </p>
             <Link to="/search">
-              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
+              <Button variant="light" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
                 Start Exploring
-                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </motion.div>

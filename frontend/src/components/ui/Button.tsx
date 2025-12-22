@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -32,7 +32,8 @@ export const Button: React.FC<ButtonProps> = ({
     primary: 'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-500 shadow-sm hover:shadow',
     secondary: 'bg-slate-100 text-slate-900 hover:bg-slate-200 focus:ring-slate-300',
     outline: 'border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 focus:ring-slate-300',
-    ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-300'
+    ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-300',
+    light: 'bg-white text-slate-900 hover:bg-slate-100 focus:ring-white/50 shadow-lg hover:shadow-xl'
   };
   
   const sizes = {
