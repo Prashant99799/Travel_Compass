@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// API Base URL - Configure in environment
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// API Base URL - Use relative path for Vite proxy in development
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export interface User {
   id: string;

@@ -38,7 +38,7 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({
     >
       <Card hover onClick={onClick} padding="none" className="overflow-hidden">
         {/* Image */}
-        <div className="relative h-32 sm:h-48 overflow-hidden">
+        <div className="relative h-48 overflow-hidden">
           <motion.img
             src={destination.imageUrl}
             alt={destination.name}
@@ -46,8 +46,8 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           
-          {/* Hover Overlay - hidden on mobile */}
-          <div className="hidden sm:flex absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors duration-300 items-center justify-center">
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors duration-300 flex items-center justify-center">
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               whileHover={{ opacity: 1, scale: 1 }}
@@ -61,23 +61,23 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({
           </div>
           
           {/* Score Badge */}
-          <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+          <div className="absolute top-3 right-3">
             <motion.div 
               whileHover={{ scale: 1.05 }}
               className={`
-                px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold border backdrop-blur-sm
+                px-2.5 py-1 rounded-lg text-xs font-semibold border backdrop-blur-sm
                 ${qualityColors[matchQuality]}
               `}
             >
-              {Math.round(score)}%
+              {Math.round(score)}% Match
             </motion.div>
           </div>
           
           {/* Category */}
-          <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3">
+          <div className="absolute bottom-3 left-3">
             <motion.span 
               whileHover={{ scale: 1.05 }}
-              className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-white/90 backdrop-blur-sm rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium text-slate-700 cursor-default"
+              className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-medium text-slate-700 cursor-default"
             >
               {destination.category}
             </motion.span>
@@ -85,17 +85,17 @@ export const DestinationCard: React.FC<DestinationCardProps> = ({
         </div>
         
         {/* Content */}
-        <div className="p-3 sm:p-5">
-          <h3 className="text-sm sm:text-lg font-semibold text-slate-900 mb-0.5 sm:mb-1 group-hover:text-slate-700 transition-colors line-clamp-1">
+        <div className="p-5">
+          <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-slate-700 transition-colors">
             {destination.name}
           </h3>
           
-          <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 mb-2 sm:mb-4 hidden sm:block">
+          <p className="text-sm text-slate-500 line-clamp-2 mb-4">
             {destination.description}
           </p>
           
           {/* Stats */}
-          <div className="flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 text-xs sm:text-sm text-slate-600">
+          <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
             <motion.div 
               whileHover={{ scale: 1.05, color: '#334155' }}
               className="flex items-center gap-1 cursor-default"

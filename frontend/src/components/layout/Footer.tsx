@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Compass, Github, Twitter, Mail, Heart } from 'lucide-react';
+import { Compass, Github, Instagram, Mail, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -44,15 +44,15 @@ export const Footer: React.FC = () => {
             </p>
             <div className="flex gap-4">
               <a 
-                href="https://twitter.com" 
+                href="https://www.instagram.com/____.hardik.____?igsh=dGpvbHRnM3k0d3h2" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition-all duration-200 hover:scale-110"
               >
-                <Twitter className="w-5 h-5" />
+                <Instagram className="w-5 h-5" />
               </a>
               <a 
-                href="https://github.com" 
+                href="https://github.com/Prashant99799" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition-all duration-200 hover:scale-110"
@@ -60,7 +60,7 @@ export const Footer: React.FC = () => {
                 <Github className="w-5 h-5" />
               </a>
               <a 
-                href="mailto:hello@compass.app" 
+                href="mailto:hardikbhadoriya1155@gmail.com" 
                 className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition-all duration-200 hover:scale-110"
               >
                 <Mail className="w-5 h-5" />

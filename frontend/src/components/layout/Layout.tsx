@@ -7,12 +7,10 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
-      <main className="flex-1 pb-24 md:pb-0">
+      <main className="flex-1 pb-20 md:pb-0">
         <Outlet />
       </main>
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };

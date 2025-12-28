@@ -227,11 +227,11 @@ export const PostsPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Community Posts</h1>
-              <p className="text-sm sm:text-base text-slate-600 mt-1">
+              <h1 className="text-3xl font-bold text-slate-900">Community Posts</h1>
+              <p className="text-slate-600 mt-1">
                 Share reviews, ask questions, and connect with travelers
               </p>
             </div>
@@ -297,15 +297,15 @@ export const PostsPage: React.FC = () => {
 
       {/* Tag Filters */}
       <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
-          <div className="flex gap-2 items-center overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
-            <span className="text-xs sm:text-sm font-medium text-slate-600 mr-1 sm:mr-2 flex-shrink-0">Filter:</span>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-slate-600 mr-2">Filter:</span>
             {(['all', 'review', 'question', 'tip', 'experience', 'recommendation'] as TagFilter[]).map(tag => (
               <button
                 key={tag}
                 onClick={() => setTagFilter(tag)}
                 className={`
-                  px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all capitalize whitespace-nowrap flex-shrink-0
+                  px-3 py-1.5 rounded-lg text-sm font-medium transition-all capitalize
                   ${tagFilter === tag 
                     ? 'bg-slate-900 text-white' 
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
@@ -319,7 +319,7 @@ export const PostsPage: React.FC = () => {
       </div>
 
       {/* Posts List */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
@@ -344,41 +344,41 @@ export const PostsPage: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Card className="p-4 sm:p-6 hover:shadow-md transition-shadow">
+                  <Card className="p-6 hover:shadow-md transition-shadow">
                     {/* Post Header */}
-                    <div className="flex items-start gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="flex items-start gap-3 mb-4">
                       <img
                         src={post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name)}&background=random`}
                         alt={post.author_name}
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
+                        className="w-10 h-10 rounded-full object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                          <span className="font-medium text-sm sm:text-base text-slate-900 truncate">{post.author_name}</span>
-                          <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${tagColors[post.tag] || 'bg-slate-100 text-slate-600'}`}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-slate-900">{post.author_name}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tagColors[post.tag] || 'bg-slate-100 text-slate-600'}`}>
                             {post.tag}
                           </span>
                           {post.is_edited && (
-                            <span className="text-[10px] sm:text-xs text-slate-400">(edited)</span>
+                            <span className="text-xs text-slate-400">(edited)</span>
                           )}
                         </div>
-                        <span className="text-xs sm:text-sm text-slate-500">
+                        <span className="text-sm text-slate-500">
                           {format(new Date(post.created_at), 'MMM d, yyyy')}
                         </span>
                       </div>
                     </div>
 
                     {/* Post Content */}
-                    <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">{post.title}</h3>
-                    <p className="text-sm sm:text-base text-slate-600 mb-3 sm:mb-4 whitespace-pre-wrap line-clamp-4 sm:line-clamp-none">{post.content}</p>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">{post.title}</h3>
+                    <p className="text-slate-600 mb-4 whitespace-pre-wrap">{post.content}</p>
 
                     {/* Post Image */}
                     {post.image_url && (
-                      <div className="mb-3 sm:mb-4 rounded-xl overflow-hidden -mx-4 sm:mx-0">
+                      <div className="mb-4 rounded-xl overflow-hidden">
                         <img 
                           src={post.image_url} 
                           alt={post.title}
-                          className="w-full h-48 sm:h-64 object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                           }}
@@ -520,18 +520,18 @@ export const PostsPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
             onClick={() => setShowCreateModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 100 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 100 }}
-              className="bg-white rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Create New Post</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900">Create New Post</h2>
                 <button
                   onClick={() => setShowCreateModal(false)}
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -540,7 +540,7 @@ export const PostsPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     Title

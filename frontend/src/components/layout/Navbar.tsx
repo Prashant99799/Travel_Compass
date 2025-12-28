@@ -149,8 +149,8 @@ export const Navbar: React.FC = () => {
       </div>
       
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-2 pb-safe z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
-        <div className="flex items-center justify-around py-1">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-2 z-50">
+        <div className="flex items-center justify-around">
           {navItems.map((item) => {
             // For mobile, show profile only if authenticated, otherwise show login
             if (item.requiresAuth && !isAuthenticated) {
@@ -174,12 +174,12 @@ export const Navbar: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all min-w-[56px]
-                  ${isActive ? 'text-slate-900 bg-slate-100' : 'text-slate-400 active:bg-slate-50'}
+                  flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all
+                  ${isActive ? 'text-slate-900' : 'text-slate-400'}
                 `}
               >
                 <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
-                <span className="text-[10px] font-medium leading-tight">{item.label}</span>
+                <span className="text-xs font-medium">{item.label}</span>
               </Link>
             );
           })}

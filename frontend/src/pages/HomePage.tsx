@@ -53,25 +53,25 @@ export const HomePage: React.FC = () => {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1548013146-72479768bada?w=1920')] bg-cover bg-center opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-900" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 lg:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="max-w-3xl"
           >
-            <div className="flex items-center gap-2 mb-4 sm:mb-6 flex-wrap">
-              <SeasonBadge season={currentSeason} size="sm" />
-              <span className="text-slate-400 hidden sm:inline">•</span>
-              <span className="text-slate-300 text-sm sm:text-base">Perfect weather for exploring</span>
+            <div className="flex items-center gap-2 mb-6">
+              <SeasonBadge season={currentSeason} />
+              <span className="text-slate-400">•</span>
+              <span className="text-slate-300">Perfect weather for exploring</span>
             </div>
             
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               {greeting}! <br />
               <span className="text-slate-300">Explore Ahmedabad</span>
             </h1>
             
-            <p className="text-base sm:text-xl text-slate-300 mb-6 sm:mb-8 max-w-2xl">
+            <p className="text-lg sm:text-xl text-slate-300 mb-8 max-w-2xl">
               Discover the best destinations, get personalized recommendations, 
               and find insider tips—all optimized for the current season.
             </p>
@@ -85,8 +85,8 @@ export const HomePage: React.FC = () => {
                   className="bg-white/10 border-white/20 text-white placeholder-slate-400 focus:bg-white/20"
                 />
               </div>
-              <Link to="/search" className="w-full sm:w-auto">
-                <Button variant="light" size="lg" className="w-full" rightIcon={<ArrowRight className="w-4 h-4" />}>
+              <Link to="/search">
+                <Button variant="light" size="lg" className="w-full sm:w-auto" rightIcon={<ArrowRight className="w-4 h-4" />}>
                   Explore
                 </Button>
               </Link>
@@ -96,23 +96,23 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* Features Section */}
-      <section className="py-10 sm:py-16 lg:py-20 bg-white">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-12"
           >
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
               Smart Travel Planning
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
+            <p className="text-slate-600 max-w-2xl mx-auto">
               Powered by machine learning to give you the best recommendations
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -139,14 +139,14 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* Top Destinations */}
-      <section className="py-10 sm:py-16 lg:py-20 bg-slate-50">
+      <section className="py-16 sm:py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
                 Top Picks for {seasonInfo.label}
               </h2>
-              <p className="text-sm sm:text-base text-slate-600">
+              <p className="text-slate-600">
                 Best-rated destinations for this time of year
               </p>
             </div>
@@ -157,7 +157,7 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {topDestinations.map((dest, index) => (
               <DestinationCard
                 key={dest.destination.id}
@@ -171,25 +171,25 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* Tips Section */}
-      <section className="py-10 sm:py-16 lg:py-20 bg-white">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
                 Trending Tips
               </h2>
-              <p className="text-sm sm:text-base text-slate-600">
+              <p className="text-slate-600">
                 Most helpful advice from fellow travelers
               </p>
             </div>
-            <Link to="/tips" className="self-start sm:self-auto">
-              <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+            <Link to="/tips">
+              <Button variant="outline" rightIcon={<ArrowRight className="w-4 h-4" />}>
                 All Tips
               </Button>
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {topTips.map((tip, index) => (
               <motion.div
                 key={tip.id}
@@ -231,18 +231,18 @@ export const HomePage: React.FC = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-slate-900 text-white">
+      <section className="py-16 sm:py-20 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Compass className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 sm:mb-6 text-slate-400" />
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
+            <Compass className="w-12 h-12 mx-auto mb-6 text-slate-400" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Ready to Explore?
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 max-w-xl mx-auto px-4">
+            <p className="text-slate-400 mb-8 max-w-xl mx-auto">
               Start planning your perfect Ahmedabad adventure with personalized recommendations.
             </p>
             <Link to="/search">
