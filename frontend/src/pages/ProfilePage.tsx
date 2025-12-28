@@ -130,39 +130,39 @@ export const ProfilePage: React.FC = () => {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             {/* Avatar */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="relative"
+              className="relative mx-auto sm:mx-0"
             >
               {user.avatar_url ? (
                 <img
                   src={user.avatar_url}
                   alt={user.name}
-                  className="w-24 h-24 rounded-2xl bg-slate-100 shadow-sm object-cover"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-100 shadow-sm object-cover"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-sm">
                   {getInitials(user.name)}
                 </div>
               )}
-              <div className="absolute -bottom-2 -right-2 p-1.5 bg-white rounded-lg shadow-sm">
+              <div className="absolute -bottom-2 -right-2 p-1 sm:p-1.5 bg-white rounded-lg shadow-sm">
                 <SeasonBadge season={currentSeason} size="sm" showLabel={false} />
               </div>
             </motion.div>
             
             {/* Info */}
-            <div className="flex-1">
+            <div className="flex-1 text-center sm:text-left">
               {isEditing ? (
                 <div className="space-y-3">
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="text-2xl font-bold text-slate-900 border-b-2 border-emerald-500 focus:outline-none bg-transparent w-full"
+                    className="text-xl sm:text-2xl font-bold text-slate-900 border-b-2 border-emerald-500 focus:outline-none bg-transparent w-full text-center sm:text-left"
                     placeholder="Your name"
                   />
                   <textarea
@@ -172,7 +172,7 @@ export const ProfilePage: React.FC = () => {
                     placeholder="Tell us about yourself..."
                     rows={2}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 justify-center sm:justify-start">
                     <Button size="sm" onClick={handleSaveProfile} disabled={saving}>
                       {saving ? 'Saving...' : <><Save className="w-4 h-4 mr-1" /> Save</>}
                     </Button>
@@ -183,17 +183,17 @@ export const ProfilePage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold text-slate-900 mb-1">{user.name}</h1>
-                  <p className="text-sm text-slate-500 mb-2">{user.email}</p>
-                  {user.bio && <p className="text-sm text-slate-600 mb-2">{user.bio}</p>}
-                  <div className="flex items-center gap-4 text-sm text-slate-600">
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{user.name}</h1>
+                  <p className="text-xs sm:text-sm text-slate-500 mb-2">{user.email}</p>
+                  {user.bio && <p className="text-xs sm:text-sm text-slate-600 mb-2">{user.bio}</p>}
+                  <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-600 justify-center sm:justify-start flex-wrap">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       Joined {formatDate(user.created_at)}
                     </span>
                     {user.is_native && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         Local Expert
                       </span>
                     )}

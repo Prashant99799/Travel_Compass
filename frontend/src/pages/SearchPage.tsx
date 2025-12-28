@@ -131,9 +131,9 @@ export const SearchPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col gap-4">
+      <div className="bg-white border-b border-slate-100 sticky top-14 sm:top-16 z-40">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Search Input */}
               <div className="flex-1">
@@ -171,7 +171,7 @@ export const SearchPage: React.FC = () => {
             </div>
             
             {/* Quick Category Filters */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
               {quickCategories.map(({ key, icon: Icon, label }) => {
                 const isActive = filters.categories?.includes(key);
                 return (
@@ -181,23 +181,24 @@ export const SearchPage: React.FC = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => toggleCategory(key)}
                     className={`
-                      flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all
+                      flex items-center gap-1.5 sm:gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0
                       ${isActive 
                         ? 'bg-slate-900 text-white shadow-sm' 
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}
                     `}
                   >
-                    <Icon className="w-4 h-4" />
-                    {label}
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">{label}</span>
+                    <span className="xs:hidden">{key}</span>
                   </motion.button>
                 );
               })}
             </div>
             
             {/* Season Selector */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-slate-500 mr-2">
-                <Clock className="w-4 h-4 inline mr-1" />
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
+              <span className="text-xs sm:text-sm font-medium text-slate-500 mr-1 sm:mr-2 flex-shrink-0">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline mr-1" />
                 Season:
               </span>
               {(['summer', 'monsoon', 'autumn', 'winter'] as Season[]).map((s) => {

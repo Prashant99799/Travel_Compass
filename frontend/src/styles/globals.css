@@ -5,6 +5,11 @@
 @layer base {
   * {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html {
+    -webkit-text-size-adjust: 100%;
   }
   
   body {
@@ -12,6 +17,27 @@
     background-color: #fafaf9;
     color: #1c1917;
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    overscroll-behavior: none;
+  }
+  
+  /* Hide scrollbar for horizontal scroll elements while keeping functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Safe area padding for notched devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
   }
 }
 
