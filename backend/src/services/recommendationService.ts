@@ -4,7 +4,7 @@ import { InferenceEngine } from '../ml/inference.js';
 import { calculateDestinationScore, generateReasons, calculateConfidence } from '../ml/models/destinationRanker.js';
 import { getCurrentSeason } from './seasonService.js';
 import { db } from '../db/client.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 interface SeasonalWeatherRecord {
   id: string;
@@ -22,22 +22,23 @@ interface SeasonalWeatherRecord {
 export class RecommendationService {
   /**
    * Get recommendations based on search parameters
+   * Implements the Hybrid Recommendation Algorithm from MASTER_PROMPT.md
    */
   static async getRecommendations(
     params: SearchParams
   ): Promise<Recommendation[]> {
+    const startTime = Date.now();
     const currentSeason = params.season || getCurrentSeason();
-    const userBudget = params.budget;
     const travelType = params.travelType || 'solo';
     const days = params.days || 3;
 
     try {
-      // Step 1: Get all destinations
+      // STEP 1: Get all destinations
       const allDestinations = await db.select().from(destinations);
 
-      // Step 2: Predict budget if not provided
-      let predictedBudget = userBudget;
-      if (!userBudget && days) {
+      // STEP 2: Predict budget if not provided (AI fills gaps)
+      let predictedBudget = params.budget;
+      if (!params.budget && days) {
         predictedBudget = InferenceEngine.predictBudget(
           days,
           travelType,
@@ -45,7 +46,7 @@ export class RecommendationService {
         );
       }
 
-      // Step 3: Get seasonal data for all destinations
+      // STEP 3: Get seasonal data for current season
       const seasonalDataList = await db
         .select()
         .from(seasonal_weather)
@@ -55,18 +56,20 @@ export class RecommendationService {
         seasonalDataList.map((sw: SeasonalWeatherRecord) => [sw.destination_id, sw])
       );
 
-      // Step 4: Rank destinations
+      // STEP 4: Score and rank each destination
       const rankedDestinations: RankedDestination[] = allDestinations
         .map((dest): RankedDestination => {
           const seasonalData = seasonalMap.get(dest.id);
-          const seasonalScore = seasonalData?.seasonal_score || 60;
-          const seasonalFit = InferenceEngine.calculateSeasonalFitness(
-            seasonalScore,
-            80
-          );
+          const seasonScore = seasonalData?.seasonal_score || 50;
+          
+          // Use the enhanced inference engine scoring
+          const seasonalFit = InferenceEngine.calculateSeasonalFitness(seasonScore);
           const budgetFit = InferenceEngine.calculateBudgetFitness(
             dest.avg_budget || 0,
             predictedBudget
+          );
+          const popularityFit = InferenceEngine.calculatePopularityFitness(
+            dest.popularity_score || 50
           );
 
           // Convert database record to Destination type
@@ -86,10 +89,11 @@ export class RecommendationService {
             created_at: dest.created_at || new Date(),
           };
 
-          const matchScore = calculateDestinationScore(
-            destination,
+          // Calculate final score using weighted combination
+          const matchScore = InferenceEngine.calculateFinalScore(
             seasonalFit,
-            budgetFit
+            budgetFit,
+            popularityFit
           );
 
           return {
@@ -99,19 +103,21 @@ export class RecommendationService {
             budgetFit,
           };
         })
+        // STEP 5: Filter low scores (minimum 40)
         .filter((item: RankedDestination) => item.matchScore >= 40)
+        // STEP 6: Sort by score descending
         .sort((a: RankedDestination, b: RankedDestination) => b.matchScore - a.matchScore)
+        // STEP 7: Take top 10
         .slice(0, 10);
 
-      // Step 5: Get tips for top destinations
+      // STEP 8: Enrich with tips and generate reasons
       const recommendations = await Promise.all(
         rankedDestinations.map(async (item) => {
           const destinationTips = await db
             .select()
             .from(tips)
-            .where(
-              eq(tips.destination_id, item.destination.id)
-            )
+            .where(eq(tips.destination_id, item.destination.id))
+            .orderBy(desc(tips.upvotes))
             .limit(3);
 
           const hasRelevantTips = destinationTips.length > 0;
@@ -123,10 +129,11 @@ export class RecommendationService {
             hasRelevantTips
           );
 
-          const confidence = calculateConfidence(
+          const confidence = InferenceEngine.calculateConfidence(
             item.seasonalMatch,
             item.budgetFit,
-            hasRelevantTips
+            hasRelevantTips,
+            !!params.budget
           );
 
           return {
@@ -138,6 +145,7 @@ export class RecommendationService {
         })
       );
 
+      console.log(`Recommendations generated in ${Date.now() - startTime}ms`);
       return recommendations;
     } catch (error) {
       console.error('Error getting recommendations:', error);
@@ -154,6 +162,7 @@ export class RecommendationService {
         .select()
         .from(tips)
         .where(eq(tips.featured, true))
+        .orderBy(desc(tips.upvotes))
         .limit(10);
 
       return trendingTips;
@@ -186,7 +195,7 @@ export class RecommendationService {
           );
       }
 
-      const result = await query.limit(5);
+      const result = await query.orderBy(desc(tips.upvotes)).limit(5);
       return result;
     } catch (error) {
       console.error('Error getting tips for destination:', error);

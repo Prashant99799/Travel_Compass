@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1766908191631,
+      "tag": "0000_flippant_prima",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1766911701713,
+      "tag": "0001_lean_thena",
+      "breakpoints": true
+    }
+  ]
+}

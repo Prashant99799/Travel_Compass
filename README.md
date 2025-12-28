@@ -1,85 +1,79 @@
-# Compass - Season-Aware Travel Helper for Ahmedabad
 
-A production-ready, AI-powered travel planning web application for Ahmedabad with hybrid recommendations based on season, budget, and preferences.
+# Travel Compass
 
-## 🚀 Quick Start
+_Your season-aware, AI-powered travel buddy for Ahmedabad!_
 
-### Prerequisites
+Travel Compass helps you discover the best places to visit, plan your trip, and connect with fellow travelers—all with a beautiful, modern UI and smart recommendations based on season, budget, and your interests.
+
+---
+
+## 🚀 Getting Started (Local)
+
+**Requirements:**
 - Node.js 20+
-- PostgreSQL 15+
-- Docker & Docker Compose (optional)
+- PostgreSQL 15+ (or Neon/Supabase cloud DB)
 
-### Local Development
-
-#### 1. Setup Backend
+### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
-
-# Create .env file
-cp .env.example .env
-
-# Update DATABASE_URL in .env
-DATABASE_URL=postgresql://user:password@localhost:5432/compass
-
-# Run migrations and seed
+# Copy and edit .env (see .env.example)
+# Set your DATABASE_URL (Neon recommended for cloud)
 npm run migrate
 npm run seed
-
-# Start development server
 npm run dev
 ```
 
-#### 2. Setup Frontend
+### 2. Frontend Setup
 
 ```bash
 cd frontend
 npm install
-
-# Start Vite dev server
+# Copy and edit .env (see .env.example)
 npm run dev
 ```
 
-Visit `http://localhost:5173` to see the app!
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Docker Compose Setup
+**Demo login:**
+- Email: `demo@travelcompass.com`
+- Password: `demo123`
 
-```bash
-docker-compose up -d
+---
+
+## 🌍 Deploying to Vercel (Recommended)
+
+You can deploy the frontend to Vercel for a free, production-grade experience. Here’s how:
+
+### 1. Prepare Your Database
+- Use [Neon](https://neon.tech) (free Postgres cloud) and copy your connection string.
+- Run migrations and seed data locally or via a script (see backend setup above).
+
+### 2. Deploy Backend (API)
+- Deploy your backend to [Railway](https://railway.app), [Render](https://render.com), or any Node.js host.
+- Set your environment variables (DATABASE_URL, JWT_SECRET, etc) in the host’s dashboard.
+
+### 3. Deploy Frontend to Vercel
+- Push your code to GitHub.
+- Go to [Vercel](https://vercel.com/import) and import your frontend folder.
+- Set the environment variable `VITE_API_URL` to your backend’s public API URL (e.g. `https://your-backend.up.railway.app/api`).
+- Click Deploy. That’s it!
+
+**Tip:** You can use Vercel’s preview deployments for every PR.
+
+---
+
+
+## 🗂️ Project Structure
+
+```
+Travel_Compass/
+├── frontend/   # React + Vite + Tailwind
+├── backend/    # Express + TypeScript + Drizzle ORM
+├── docs/       # Project docs
 ```
 
-This will start:
-- PostgreSQL on port 5432
-- Backend API on port 3000
-- Frontend on port 5173
-
-## 📁 Project Structure
-
-```
-compass/
-├── frontend/                 # React + TypeScript
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API client
-│   │   ├── types/           # TypeScript types
-│   │   ├── utils/           # Helper functions
-│   │   └── styles/          # Tailwind CSS
-│   └── package.json
-│
-├── backend/                  # Express + TypeScript
-│   ├── src/
-│   │   ├── db/              # Database schema & migrations
-│   │   ├── ml/              # ML models & inference
-│   │   ├── routes/          # API endpoints
-│   │   ├── services/        # Business logic
-│   │   ├── middleware/      # Express middleware
-│   │   └── types/           # TypeScript types
-│   └── package.json
-│
-└── docs/                    # Documentation
-```
 
 ## 🎯 Key Features
 
@@ -98,13 +92,27 @@ compass/
 - Voting system (upvote/downvote)
 - Season-specific content
 
-### 4. **Beautiful UI**
+### 4. **Simple JWT Authentication**
+- Secure signup/login system
+- JWT token-based sessions (7-day expiry)
+- Password hashing with bcrypt (12 rounds)
+- Protected routes for authenticated users
+
+### 5. **Beautiful UI**
 - Glassmorphism design
 - Smooth animations with Framer Motion
 - Fully responsive mobile-first design
 - Dark theme with gradients
 
 ## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/signup` - Create new account
+- `POST /api/auth/login` - Login & get JWT token
+- `GET /api/auth/me` - Get current user (protected)
+- `GET /api/auth/profile` - Get user profile (protected)
+- `PATCH /api/auth/profile` - Update profile (protected)
+- `PUT /api/auth/password` - Change password (protected)
 
 ### Search
 - `POST /api/search` - Get recommendations
@@ -120,8 +128,17 @@ compass/
 - `POST /api/tips/:id/vote` - Vote on tip
 
 ### Travel Plans
-- `GET /api/plans` - User's plans
-- `POST /api/plans` - Create plan
+- `GET /api/plans` - User's plans (protected)
+- `POST /api/plans` - Create plan (protected)
+
+### Bookmarks
+- `GET /api/bookmarks` - Get user bookmarks (protected)
+- `POST /api/bookmarks` - Add bookmark (protected)
+- `DELETE /api/bookmarks/:id` - Remove bookmark (protected)
+
+### Seasons
+- `GET /api/seasons/current` - Get current season info
+- `GET /api/seasons/:season/destinations` - Get destinations for season
 
 ## 🤖 ML Models
 
@@ -138,12 +155,14 @@ score = (seasonal_fit × 0.4) + (budget_fit × 0.3) + (popularity × 0.3)
 ## 📊 Database Schema
 
 ### Core Tables
-- `users` - User profiles
+- `users` - User profiles with password_hash
 - `destinations` - Travel destinations
 - `seasonal_weather` - Weather data by season
 - `tips` - Community travel tips
 - `travel_plans` - User's saved plans
 - `votes` - Tip voting system
+- `bookmarks` - User bookmarked destinations
+- `user_activity` - Activity tracking
 
 ## 🎨 Design System
 
@@ -161,44 +180,29 @@ score = (seasonal_fit × 0.4) + (budget_fit × 0.3) + (popularity × 0.3)
 - Modal
 - Loader
 
-## 🚢 Deployment
 
-### Vercel (Frontend)
-```bash
-npm run build
-# Deploy dist/ folder to Vercel
-```
+## 🚀 Deployment (Summary)
 
-### Railway/Render (Backend)
-```bash
-# Set environment variables
-DATABASE_URL=<your-db-url>
-CLERK_SECRET_KEY=<your-key>
+- **Frontend:** Vercel (recommended, free)
+- **Backend:** Railway, Render, or your own VPS
+- **Database:** Neon (free Postgres), Supabase, or any Postgres host
 
-# Deploy backend folder
-```
+See the full deployment guide above!
 
-### Database
-Use managed PostgreSQL:
-- Neon
-- Supabase
-- RDS
 
 ## 📝 Environment Variables
 
 ### Backend (.env)
-```
-DATABASE_URL=postgresql://...
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/travel_compass
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-min-32-chars
 PORT=3000
-NODE_ENV=production
-CLERK_SECRET_KEY=sk_xxx
-CLERK_WEBHOOK_SECRET=whsec_xxx
+NODE_ENV=development
 ```
 
 ### Frontend (.env)
-```
-VITE_API_BASE_URL=https://api.compass.dev
-VITE_CLERK_PUBLISHABLE_KEY=pk_xxx
+```env
+VITE_API_URL=http://localhost:3000/api
 ```
 
 ## 🧪 Testing
@@ -222,16 +226,20 @@ npm run lint
 
 ## 🔐 Security
 
+- JWT authentication (7-day token expiry)
+- Password hashing with bcrypt (12 salt rounds)
 - Input validation with Zod
 - CORS protection
 - SQL injection prevention (Drizzle ORM)
 - Environment variable management
-- Rate limiting (planned)
+- Protected API routes with middleware
 
 ## 🛣️ Roadmap
 
+- [x] Simple JWT authentication (signup/login)
+- [x] User profiles and settings
+- [x] Bookmarks system
 - [ ] Real-time weather API integration
-- [ ] User authentication with Clerk
 - [ ] Collaborative trip planning
 - [ ] AR destination navigation
 - [ ] Expense tracking
@@ -255,10 +263,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 MIT License - feel free to use this project for personal and commercial purposes.
 
-## 🧭 Author
-
-Built with ❤️ for Ahmedabad travelers
 
 ---
 
-**Ready to explore?** 🚀 Start the app and discover the best of Ahmedabad!
+## 👋 About
+
+Travel Compass is built by travelers, for travelers. We love Ahmedabad and wanted to make trip planning fun, smart, and social. If you have ideas or want to contribute, open an issue or PR!
+
+**Ready to explore?** Start the app and discover the best of Ahmedabad! 🚀

@@ -134,7 +134,8 @@ export class TipsService {
         // Update tip counts
         const tip = await this.getTipById(tipId);
         if (tip) {
-          if (previousVoteType === 'up') {
+          const isUpvote = previousVoteType === 'up' || previousVoteType === 'UP';
+          if (isUpvote) {
             await this.updateTip(tipId, {
               upvotes: Math.max(0, (tip.upvotes || 0) - 1),
             } as any);
@@ -156,7 +157,8 @@ export class TipsService {
       // Update tip counts
       const tip = await this.getTipById(tipId);
       if (tip) {
-        if (voteType === 'up') {
+        const isUpvote = voteType === 'up' || voteType === 'UP';
+        if (isUpvote) {
           await this.updateTip(tipId, {
             upvotes: (tip.upvotes || 0) + 1,
           } as any);

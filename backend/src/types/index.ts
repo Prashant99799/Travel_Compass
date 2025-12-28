@@ -1,19 +1,29 @@
 // Core Types
 export type Season = 'summer' | 'monsoon' | 'autumn' | 'winter';
 export type TravelType = 'solo' | 'couple' | 'family' | 'group';
-export type PlanStatus = 'planned' | 'ongoing' | 'completed';
-export type VoteType = 'up' | 'down';
+export type PlanStatus = 'draft' | 'planned' | 'ongoing' | 'completed' | 'cancelled';
+export type VoteType = 'up' | 'down' | 'UP' | 'DOWN'; // Support both formats
+export type PostTag = 'review' | 'question' | 'tip' | 'experience' | 'recommendation';
+export type ActivityType = 'search' | 'view_destination' | 'view_tip' | 'create_plan' | 'vote' | 'bookmark';
+
+// User Preferences
+export interface UserPreferences {
+  favorite_categories?: string[];
+  budget_preference?: 'budget' | 'moderate' | 'luxury';
+  travel_style?: TravelType;
+  interests?: string[];
+}
 
 // User
 export interface User {
   id: string;
-  clerk_id: string;
   email: string;
+  password_hash?: string; // Not returned in API responses
   name: string;
   is_native: boolean;
   avatar_url: string | null;
   bio: string | null;
-  preferences: Record<string, any>;
+  preferences: UserPreferences;
   created_at: Date;
   updated_at: Date;
 }

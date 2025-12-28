@@ -2,6 +2,11 @@
 
 ## 🚀 Quick Start (5 minutes)
 
+### Prerequisites
+- Node.js 18+ 
+- PostgreSQL database (local or cloud like Neon, Supabase)
+- Clerk account (https://clerk.com)
+
 ### Option 1: Docker Compose (Recommended)
 
 ```bash
@@ -27,6 +32,64 @@ node --version  # Should be 20+
 
 # Check npm version
 npm --version   # Should be 9+
+```
+
+## 🔐 Clerk Authentication Setup
+
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com)
+2. Create a new application
+3. Go to **API Keys** section
+4. Copy the **Publishable Key** and **Secret Key**
+
+### Configure Environment Variables
+
+#### Frontend (.env)
+Create `frontend/.env`:
+```env
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY
+VITE_API_URL=http://localhost:3000
+```
+
+#### Backend (.env)
+Create `backend/.env`:
+```env
+PORT=3000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+DATABASE_URL=postgresql://user:password@localhost:5432/compass
+CLERK_SECRET_KEY=sk_test_YOUR_SECRET_KEY
+CLERK_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY
+```
+
+## 📝 New Features
+
+### Posts & Reviews System
+- Create posts (reviews, questions, tips, experiences, recommendations)
+- View and filter posts by category
+- Upvote/downvote posts
+- Reply to posts with nested threads
+
+### API Endpoints
+
+#### User Routes (`/api/v1/user`)
+- `POST /sync` - Sync Clerk user to database
+- `GET /profile` - Get user profile
+- `PATCH /profile` - Update profile
+- `GET /posts` - Get user's posts
+
+#### Posts Routes (`/api/v1/posts`)
+- `GET /` - Get all posts (paginated)
+- `POST /` - Create new post
+- `GET /:postId` - Get single post
+- `PATCH /:postId` - Update post
+- `DELETE /:postId` - Delete post
+- `GET /:postId/replies` - Get post replies
+- `POST /:postId/replies` - Add reply
+
+#### Votes Routes (`/api/v1/votes`)
+- `POST /post/:postId` - Vote on post
+- `DELETE /post/:postId` - Remove vote
+- `POST /reply/:replyId` - Vote on reply
 
 # Check PostgreSQL
 psql --version  # Should be 15+

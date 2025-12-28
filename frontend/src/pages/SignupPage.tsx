@@ -1,210 +1,247 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Eye, EyeOff, Compass, ArrowRight, AlertCircle, Check } from 'lucide-react';
-import { Button, Input, Card } from '../components/ui';
-import { useAuth } from '../context';
+import { Compass, Mail, Lock, User, Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signup, isLoading } = useAuth();
+  const { signup, isLoading, isAuthenticated } = useAuth();
   
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  
-  const passwordRequirements = [
-    { label: 'At least 8 characters', met: formData.password.length >= 8 },
-    { label: 'Contains a number', met: /\d/.test(formData.password) },
-    { label: 'Contains uppercase', met: /[A-Z]/.test(formData.password) }
-  ];
-  
-  const isPasswordValid = passwordRequirements.every(req => req.met);
-  
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Password strength indicator
+  const getPasswordStrength = (pass: string) => {
+    let strength = 0;
+    if (pass.length >= 8) strength++;
+    if (/[A-Z]/.test(pass)) strength++;
+    if (/[a-z]/.test(pass)) strength++;
+    if (/[0-9]/.test(pass)) strength++;
+    if (/[^A-Za-z0-9]/.test(pass)) strength++;
+    return strength;
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-emerald-500'];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!formData.name || !formData.email || !formData.password) {
+
+    // Validation
+    if (!name || !email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
-    
-    if (!isPasswordValid) {
-      setError('Please meet all password requirements');
+
+    if (name.length < 2) {
+      setError('Name must be at least 2 characters');
       return;
     }
-    
-    if (formData.password !== formData.confirmPassword) {
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
-    if (!agreedToTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy');
-      return;
-    }
-    
-    const result = await signup(formData.name, formData.email, formData.password);
+
+    const result = await signup(name, email, password);
     
     if (result.success) {
-      navigate('/verify-email');
+      navigate('/');
     } else {
       setError(result.message);
     }
   };
-  
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
-              <Compass className="w-7 h-7 text-white" />
+          <Link to="/" className="inline-block">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/25">
+              <Compass className="w-9 h-9 text-white" />
             </div>
           </Link>
-          <h1 className="mt-4 text-2xl font-bold text-slate-900">Create your account</h1>
-          <p className="mt-2 text-slate-600">Start exploring Ahmedabad with Compass</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-slate-400">Start your travel journey today</p>
         </div>
-        
-        <Card padding="lg">
+
+        {/* Signup Form */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/10">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3"
+                className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3"
               >
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{error}</p>
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-300 text-sm">{error}</p>
               </motion.div>
             )}
-            
-            <Input
-              label="Full Name"
-              type="text"
-              placeholder="John Doe"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              leftIcon={<User className="w-5 h-5" />}
-            />
-            
-            <Input
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              leftIcon={<Mail className="w-5 h-5" />}
-            />
-            
+
+            {/* Name Field */}
             <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
+                Full Name
+              </label>
               <div className="relative">
-                <Input
-                  label="Password"
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-11 pr-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-11 pr-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a strong password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  leftIcon={<Lock className="w-5 h-5" />}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-11 pr-12 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-9 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               
-              {formData.password && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-3 space-y-2"
-                >
-                  {passwordRequirements.map((req) => (
-                    <div 
-                      key={req.label}
-                      className={`flex items-center gap-2 text-xs ${
-                        req.met ? 'text-emerald-600' : 'text-slate-400'
-                      }`}
-                    >
-                      <Check className={`w-3.5 h-3.5 ${req.met ? 'opacity-100' : 'opacity-30'}`} />
-                      {req.label}
-                    </div>
-                  ))}
-                </motion.div>
+              {/* Password Strength Indicator */}
+              {password && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-slate-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Strength: {strengthLabels[passwordStrength - 1] || 'Too short'}
+                  </p>
+                </div>
               )}
             </div>
-            
-            <Input
-              label="Confirm Password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              leftIcon={<Lock className="w-5 h-5" />}
-              error={
-                formData.confirmPassword && formData.password !== formData.confirmPassword
-                  ? 'Passwords do not match'
-                  : undefined
-              }
-            />
-            
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
-              />
-              <span className="text-sm text-slate-600">
-                I agree to the{' '}
-                <Link to="/terms" className="text-slate-900 hover:underline font-medium">
-                  Terms of Service
-                </Link>
-                {' '}and{' '}
-                <Link to="/privacy" className="text-slate-900 hover:underline font-medium">
-                  Privacy Policy
-                </Link>
-              </span>
-            </label>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              size="lg"
-              isLoading={isLoading}
-              rightIcon={<ArrowRight className="w-4 h-4" />}
+
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 pl-11 pr-12 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  disabled={isLoading}
+                />
+                {confirmPassword && password === confirmPassword && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
-            </Button>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                'Create Account'
+              )}
+            </button>
           </form>
-          
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
-            <p className="text-slate-600">
-              Already have an account?{' '}
-              <Link 
-                to="/login" 
-                className="font-semibold text-slate-900 hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </Card>
+
+          {/* Login Link */}
+          <p className="mt-6 text-center text-slate-400">
+            Already have an account?{' '}
+            <Link to="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+              Sign in
+            </Link>
+          </p>
+        </div>
+
+        {/* Back to Home */}
+        <p className="mt-6 text-center">
+          <Link to="/" className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
+            ← Back to Home
+          </Link>
+        </p>
       </motion.div>
     </div>
   );

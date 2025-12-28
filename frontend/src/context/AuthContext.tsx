@@ -1,230 +1,228 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// API Base URL - Configure in environment
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  avatar: string;
-  isVerified: boolean;
-  createdAt: string;
+  avatar_url: string | null;
+  bio: string | null;
+  is_native: boolean;
+  preferences: Record<string, unknown>;
+  created_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
-  verifyEmail: (token: string) => Promise<{ success: boolean; message: string }>;
-  resendVerification: () => Promise<{ success: boolean; message: string }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  updateProfile: (data: Partial<User>) => Promise<{ success: boolean; message: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users storage (in real app, this would be API calls)
-const STORAGE_KEY = 'compass_users';
-const AUTH_KEY = 'compass_auth';
-const PENDING_VERIFICATION_KEY = 'compass_pending_verification';
+const TOKEN_KEY = 'compass_token';
+const USER_KEY = 'compass_user';
 
-const getStoredUsers = (): Record<string, { user: User; password: string; verificationToken?: string }> => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : {};
-};
+// API Helper with auth
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  token?: string | null
+): Promise<{ success: boolean; data?: T; error?: string }> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
 
-const saveUsers = (users: Record<string, { user: User; password: string; verificationToken?: string }>) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        ...headers,
+        ...(options.headers as Record<string, string> || {}),
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Extract error message from various response formats
+      const errorMessage = data.error?.message || data.error || data.message || 'Request failed';
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+
+    return {
+      success: true,
+      data: data.data || data,
+    };
+  } catch (error) {
+    console.error('API Request Error:', error);
+    return {
+      success: false,
+      error: 'Network error. Please check your connection.',
+    };
+  }
+}
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load stored auth on mount
   useEffect(() => {
-    // Check for existing session
-    const storedAuth = localStorage.getItem(AUTH_KEY);
-    if (storedAuth) {
-      const { email } = JSON.parse(storedAuth);
-      const users = getStoredUsers();
-      if (users[email]) {
-        setUser(users[email].user);
-      }
-    }
-    setIsLoading(false);
-  }, []);
+    const loadStoredAuth = async () => {
+      const storedToken = localStorage.getItem(TOKEN_KEY);
+      const storedUser = localStorage.getItem(USER_KEY);
 
-  const generateToken = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+
+        // Verify token is still valid
+        const result = await apiRequest<{ user: User }>('/auth/me', {}, storedToken);
+        if (result.success && result.data) {
+          setUser(result.data.user);
+          localStorage.setItem(USER_KEY, JSON.stringify(result.data.user));
+        } else {
+          // Token invalid, clear storage
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
+          setToken(null);
+          setUser(null);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    loadStoredAuth();
+  }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users = getStoredUsers();
-    const userRecord = users[email.toLowerCase()];
-    
-    if (!userRecord) {
+
+    const result = await apiRequest<{ user: User; token: string }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (result.success && result.data) {
+      const { user: loggedInUser, token: newToken } = result.data;
+      setUser(loggedInUser);
+      setToken(newToken);
+      localStorage.setItem(TOKEN_KEY, newToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
       setIsLoading(false);
-      return { success: false, message: 'No account found with this email' };
+      return { success: true, message: 'Login successful!' };
     }
-    
-    if (userRecord.password !== password) {
-      setIsLoading(false);
-      return { success: false, message: 'Incorrect password' };
-    }
-    
-    if (!userRecord.user.isVerified) {
-      localStorage.setItem(PENDING_VERIFICATION_KEY, email.toLowerCase());
-      setIsLoading(false);
-      return { success: false, message: 'Please verify your email first. Check your inbox.' };
-    }
-    
-    setUser(userRecord.user);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ email: email.toLowerCase() }));
+
     setIsLoading(false);
-    return { success: true, message: 'Login successful!' };
+    return { success: false, message: result.error || 'Login failed' };
   };
 
   const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users = getStoredUsers();
-    
-    if (users[email.toLowerCase()]) {
+
+    const result = await apiRequest<{ user: User; token: string }>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (result.success && result.data) {
+      const { user: newUser, token: newToken } = result.data;
+      setUser(newUser);
+      setToken(newToken);
+      localStorage.setItem(TOKEN_KEY, newToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(newUser));
       setIsLoading(false);
-      return { success: false, message: 'An account with this email already exists' };
+      return { success: true, message: 'Account created successfully!' };
     }
-    
-    const verificationToken = generateToken();
-    const newUser: User = {
-      id: generateToken(),
-      email: email.toLowerCase(),
-      name,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-      isVerified: false,
-      createdAt: new Date().toISOString()
-    };
-    
-    users[email.toLowerCase()] = {
-      user: newUser,
-      password,
-      verificationToken
-    };
-    
-    saveUsers(users);
-    localStorage.setItem(PENDING_VERIFICATION_KEY, email.toLowerCase());
-    
-    // In a real app, you would send an email here
-    console.log(`Verification token for ${email}: ${verificationToken}`);
-    
+
     setIsLoading(false);
-    return { 
-      success: true, 
-      message: 'Account created! Please check your email to verify your account.',
-      // For demo purposes, we'll include the token
-    };
+    return { success: false, message: result.error || 'Signup failed' };
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem(AUTH_KEY);
+    setToken(null);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   };
 
-  const verifyEmail = async (token: string): Promise<{ success: boolean; message: string }> => {
-    setIsLoading(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const users = getStoredUsers();
-    const pendingEmail = localStorage.getItem(PENDING_VERIFICATION_KEY);
-    
-    if (!pendingEmail) {
-      setIsLoading(false);
-      return { success: false, message: 'No pending verification found' };
+  const updateProfile = async (data: Partial<User>): Promise<{ success: boolean; message: string }> => {
+    if (!token) {
+      return { success: false, message: 'Not authenticated' };
     }
-    
-    const userRecord = users[pendingEmail];
-    
-    if (!userRecord) {
-      setIsLoading(false);
-      return { success: false, message: 'User not found' };
+
+    const result = await apiRequest<User>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, token);
+
+    if (result.success && result.data) {
+      setUser(result.data);
+      localStorage.setItem(USER_KEY, JSON.stringify(result.data));
+      return { success: true, message: 'Profile updated successfully!' };
     }
-    
-    if (userRecord.verificationToken !== token) {
-      setIsLoading(false);
-      return { success: false, message: 'Invalid verification code' };
-    }
-    
-    // Mark as verified
-    userRecord.user.isVerified = true;
-    delete userRecord.verificationToken;
-    saveUsers(users);
-    
-    // Auto login after verification
-    setUser(userRecord.user);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ email: pendingEmail }));
-    localStorage.removeItem(PENDING_VERIFICATION_KEY);
-    
-    setIsLoading(false);
-    return { success: true, message: 'Email verified successfully!' };
+
+    return { success: false, message: result.error || 'Update failed' };
   };
 
-  const resendVerification = async (): Promise<{ success: boolean; message: string }> => {
-    const pendingEmail = localStorage.getItem(PENDING_VERIFICATION_KEY);
-    
-    if (!pendingEmail) {
-      return { success: false, message: 'No pending verification found' };
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> => {
+    if (!token) {
+      return { success: false, message: 'Not authenticated' };
     }
-    
-    const users = getStoredUsers();
-    const userRecord = users[pendingEmail];
-    
-    if (!userRecord) {
-      return { success: false, message: 'User not found' };
+
+    const result = await apiRequest('/auth/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }, token);
+
+    if (result.success) {
+      return { success: true, message: 'Password changed successfully!' };
     }
-    
-    const newToken = generateToken();
-    userRecord.verificationToken = newToken;
-    saveUsers(users);
-    
-    console.log(`New verification token for ${pendingEmail}: ${newToken}`);
-    
-    return { success: true, message: 'Verification email resent! Check your inbox.' };
+
+    return { success: false, message: result.error || 'Password change failed' };
   };
 
-  const forgotPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const users = getStoredUsers();
-    
-    if (!users[email.toLowerCase()]) {
-      // Don't reveal if email exists
-      return { success: true, message: 'If an account exists with this email, you will receive password reset instructions.' };
+  const refreshUser = async (): Promise<void> => {
+    if (!token) return;
+
+    const result = await apiRequest<{ user: User }>('/auth/me', {}, token);
+    if (result.success && result.data) {
+      setUser(result.data.user);
+      localStorage.setItem(USER_KEY, JSON.stringify(result.data.user));
     }
-    
-    // In real app, send password reset email
-    console.log(`Password reset requested for ${email}`);
-    
-    return { success: true, message: 'If an account exists with this email, you will receive password reset instructions.' };
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        token,
         isLoading,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!token,
         login,
         signup,
         logout,
-        verifyEmail,
-        resendVerification,
-        forgotPassword
+        updateProfile,
+        changePassword,
+        refreshUser,
       }}
     >
       {children}
@@ -240,8 +238,7 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper to get verification token for demo
-export const getVerificationToken = (email: string): string | null => {
-  const users = getStoredUsers();
-  return users[email.toLowerCase()]?.verificationToken || null;
+// Export token getter for API calls in other parts of the app
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem(TOKEN_KEY);
 };
